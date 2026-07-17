@@ -34,6 +34,24 @@
 - **남은 미해결**: ffmpeg·uv 환경 구성 필요 (명세 1단계)
 - **다음 단계**: 명세 승인 후 1단계(환경 구성)부터 체크리스트 순서로 구현
 
+### 4차 작업 (같은 날) — 구현 및 실검증 완료
+- **목표**: IMPLEMENTATION.md 체크리스트 1~4단계 전체 구현·검증 (테스트 데이터: live URL 2건)
+- **결정사항**:
+  - 테스트 URL이 `youtube.com/live/<ID>` 형식이라 URL 정규식에 `live/` 패턴 추가 (명세 §2.2 갱신)
+  - yt-dlp 2026.x의 JS 런타임 부재 경고("일부 포맷 누락 가능") 대응으로 deno 설치를 환경 요건에 추가
+  - `quiet: True`만으로 네이티브 진행률 바가 억제되지 않는 결함 발견 → `noprogress: True` 추가 (명세 §2.4 갱신)
+- **산출물**:
+  - 코드: `downloader.py`, `main.py`, `tests/test_downloader.py`, `pyproject.toml`(pytest pythonpath)
+  - 환경: Python 3.12.13(uv), yt-dlp 2026.7.4, pytest 9.1.1, ffmpeg 8.1.2, deno
+  - 다운로드 검증 파일 2건: `downloads/` (E1M1-mkrfnA 1.6GB, IEfM972ODcU 1.9GB)
+- **검증 결과**:
+  - 단위 테스트 13/13 통과 (`uv run pytest`)
+  - 통합: 4시간짜리 라이브 아카이브 2건 다운로드 성공, ffprobe로 h264 1920×1080(가용 최고 화질) 확인
+  - 오류 경로(에이전트 검증): 무효 URL exit 1 / 미존재 영상 exit 1 + 원인 메시지 / 인자 누락 exit 2 — 3/3 PASS
+- **현재 진행도**: MVP 완성 (체크리스트 4/4)
+- **남은 미해결**: 기본 `codec=best`에서 음성이 opus로 선택되어 opus-in-MP4 산출 가능 — 일부 구형 플레이어 비호환 (필요 시 `--codec compat` 사용으로 회피, 방침 결정 대기)
+- **다음 단계**: Phase 2 착수 여부 사용자 판단 (재생목록/웹 UI/자막 — DESIGN §7)
+
 ### 4차 작업 (같은 날)
 - **목표**: git 저장소 연결
 - **결정사항**: .gitignore에 다운로드 산출물(downloads/, *.mp4, *.part 등)·.venv·로컬 설정 제외

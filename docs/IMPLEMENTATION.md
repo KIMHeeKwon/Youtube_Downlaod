@@ -35,6 +35,9 @@ brew install ffmpeg
 # uv 미설치 시
 brew install uv
 
+# JS 런타임 — yt-dlp 2026.x는 JS 런타임 부재 시 일부 포맷 누락 가능 (구현 중 확인)
+brew install deno
+
 # 프로젝트 초기화 (작업 디렉토리: ~/Documents/youtube_Download)
 uv init --python 3.12 --no-workspace
 uv add yt-dlp
@@ -82,13 +85,14 @@ def download(url: str,
 | `youtube.com/watch?v=<ID>` | `https://www.youtube.com/watch?v=dQw4w9WgXcQ` |
 | `youtu.be/<ID>` | `https://youtu.be/dQw4w9WgXcQ` |
 | `youtube.com/shorts/<ID>` | `https://www.youtube.com/shorts/dQw4w9WgXcQ` |
+| `youtube.com/live/<ID>` | `https://youtube.com/live/dQw4w9WgXcQ` (라이브 아카이브 — 테스트 데이터 요구로 추가) |
 
 구현: 정규식 1개로 처리. 영상 ID는 `[A-Za-z0-9_-]{11}`.
 
 ```python
 _URL_RE = re.compile(
     r"(?:https?://)?(?:www\.|m\.)?"
-    r"(?:youtube\.com/(?:watch\?(?:.*&)?v=|shorts/)|youtu\.be/)"
+    r"(?:youtube\.com/(?:watch\?(?:.*&)?v=|shorts/|live/)|youtu\.be/)"
     r"([A-Za-z0-9_-]{11})"
 )
 ```
@@ -239,10 +243,10 @@ uv run python main.py "https://youtu.be/aaaaaaaaaaa"; echo "exit=$?"   # exit=1,
 
 ## 5. 구현 체크리스트
 
-- [ ] 1단계: 환경 구성 → `yt-dlp --version` / `ffmpeg -version` 확인
-- [ ] 2단계: `downloader.py` + 단위 테스트 → `uv run pytest` 전체 통과
-- [ ] 3단계: `main.py` → 실영상 1건 다운로드, `ffprobe` 해상도 일치 확인
-- [ ] 4단계: 오류 경로 → 무효 URL/존재하지 않는 영상에서 exit 1 + 명확한 메시지
+- [x] 1단계: 환경 구성 → `yt-dlp --version` / `ffmpeg -version` 확인 (2026-07-17: yt-dlp 2026.7.4, ffmpeg 8.1.2, Python 3.12.13, deno)
+- [x] 2단계: `downloader.py` + 단위 테스트 → `uv run pytest` 전체 통과 (13/13)
+- [x] 3단계: `main.py` → 실영상 2건 다운로드(live 아카이브 4시간×2), `ffprobe` 1920×1080 확인
+- [x] 4단계: 오류 경로 → 무효 URL/존재하지 않는 영상에서 exit 1 + 명확한 메시지, 인자 누락 exit 2
 
 ## 6. 구현하지 않는 것 (명세 고정)
 
