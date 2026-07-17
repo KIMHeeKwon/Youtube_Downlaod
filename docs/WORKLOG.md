@@ -72,3 +72,23 @@
 - **산출물**: `.github/workflows/ci.yml` — main push/PR 시 ubuntu-latest에서 uv sync → pytest 실행 (setup-uv 캐시 사용)
 - **검증 결과**: 첫 실행 성공 (run 29552693396, 10초)
 - **현재 진행도**: CI 가동 중. Phase 2 웹 UI(webapp.py, static/)는 로컬 미커밋 상태로 진행 중
+
+### 7차 작업 (같은 날) — Phase 2 구현·검증 완료 (재생목록·자막·웹 UI)
+- **목표**: DESIGN §7 Phase 2 후보 3건 전체 구현 및 실전 검증 (사용자 확정: 3건 모두, 코덱 기본값은 현행 유지)
+- **결정사항**:
+  - 명세 우선 작성: `docs/PHASE2.md` (증분 확장, 기존 인터페이스 하위 호환 유지)
+  - `watch?v=..&list=..`는 단일 영상 유지, `playlist?list=` URL만 일괄 모드
+  - 재생목록은 `ignoreerrors`로 개별 실패 건너뛰기, `%(playlist_title)s/` 하위 폴더 저장
+  - 자막은 `--subs LANGS` 옵션 → 수동+자동 자막, FFmpegSubtitlesConvertor로 .srt 변환
+- **산출물**:
+  - `downloader.py` 확장: `is_playlist_url`, `download_playlist`, `download(subs_langs=)`, `_base_opts` 공통화
+  - `main.py` 확장: `--subs`, 재생목록 분기, `[n/m]` 진행 접두, 완료 요약
+  - 신규: `webapp.py`(FastAPI, 103줄), `static/index.html`(단일 파일 UI, 110줄), `docs/PHASE2.md`
+  - 의존성 추가: fastapi, uvicorn
+- **검증 결과** (에이전트 2기 병렬 검증):
+  - 단위 테스트 19/19 통과 (is_playlist_url 6케이스 추가)
+  - 자막: `--subs ko,en` → .en.srt 생성·형식 유효 (ko는 영상에 원천 부재 — 정상)
+  - 재생목록: 공개 재생목록 10건 전량 다운로드, `[1/10]`~`[10/10]` 표시, 요약 정확 (지정 테스트 재생목록이 전항목 삭제 상태라 에이전트가 대체 재생목록 정찰·확정)
+  - 웹 UI: 기동→POST→진행률 폴링(percent 상승 실측)→done→파일 확인→무효 URL 400 — 전 항목 PASS
+- **현재 진행도**: Phase 2 완성. 로컬 미커밋 (webapp.py, static/, PHASE2.md, downloader/main/tests 수정분)
+- **다음 단계**: 커밋·푸시 여부 사용자 판단, 검증용 다운로드 파일 정리 여부 판단

@@ -2,7 +2,7 @@
 
 import pytest
 
-from downloader import build_format_selector, validate_url
+from downloader import build_format_selector, is_playlist_url, validate_url
 
 
 class TestValidateUrl:
@@ -25,6 +25,25 @@ class TestValidateUrl:
     def test_invalid(self, url):
         with pytest.raises(ValueError):
             validate_url(url)
+
+
+class TestIsPlaylistUrl:
+    @pytest.mark.parametrize("url", [
+        "https://www.youtube.com/playlist?list=PL4lCao7KL_QFVb7Iudeipvc2BCavECqzc",
+        "https://youtube.com/playlist?list=PL123abc_-",
+        "https://m.youtube.com/playlist?app=desktop&list=PL123",
+    ])
+    def test_playlist(self, url):
+        assert is_playlist_url(url) is True
+
+    @pytest.mark.parametrize("url", [
+        # watch URL에 list=가 있어도 단일 영상 모드 유지 (PHASE2.md §1)
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL123",
+        "https://youtu.be/dQw4w9WgXcQ",
+        "https://vimeo.com/playlist?list=PL123",
+    ])
+    def test_not_playlist(self, url):
+        assert is_playlist_url(url) is False
 
 
 class TestBuildFormatSelector:

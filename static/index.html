@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouTube 고화질 다운로더</title>
+<style>
+  body { font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+         max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+  h1 { font-size: 1.4rem; }
+  form { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+         padding: 1rem; background: #f5f5f5; border-radius: 8px; }
+  input[type=url] { flex: 1 1 320px; padding: .5rem; }
+  input[type=text] { width: 90px; padding: .5rem; }
+  select, button { padding: .5rem; }
+  button { background: #c00; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+  button:disabled { background: #999; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+  th, td { border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; font-size: .9rem; }
+  .bar { background: #eee; border-radius: 4px; overflow: hidden; width: 140px; height: 16px; }
+  .bar > div { background: #4caf50; height: 100%; }
+  .pct { font-size: .75rem; margin-left: .3rem; }
+  .st-error { color: #c00; } .st-done { color: #2e7d32; }
+  #msg { color: #c00; margin-top: .5rem; min-height: 1.2em; }
+</style>
+</head>
+<body>
+<h1>YouTube 고화질 다운로더</h1>
+<form id="form">
+  <input type="url" id="url" placeholder="YouTube 영상 또는 재생목록 URL" required>
+  <select id="max_height" title="최대 해상도">
+    <option value="">해상도 무제한</option>
+    <option value="2160">2160p</option>
+    <option value="1080">1080p</option>
+    <option value="720">720p</option>
+  </select>
+  <select id="codec" title="코덱">
+    <option value="best">best</option>
+    <option value="compat">compat</option>
+  </select>
+  <input type="text" id="subs" placeholder="자막 (ko,en)">
+  <button type="submit" id="btn">다운로드</button>
+</form>
+<div id="msg"></div>
+<table>
+  <thead>
+    <tr><th>제목</th><th>상태</th><th>진행률</th><th>속도</th><th>세부</th></tr>
+  </thead>
+  <tbody id="jobs"></tbody>
+</table>
+<script>
+const STATUS_KO = { queued: "대기", downloading: "다운로드 중", merging: "병합 중",
+                    done: "완료", error: "오류" };
+
+document.getElementById("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("btn");
+  const msg = document.getElementById("msg");
+  btn.disabled = true; msg.textContent = "";
+  const body = { url: document.getElementById("url").value };
+  const h = document.getElementById("max_height").value;
+  if (h) body.max_height = parseInt(h, 10);
+  body.codec = document.getElementById("codec").value;
+  const subs = document.getElementById("subs").value.trim();
+  if (subs) body.subs = subs;
+  try {
+    const res = await fetch("/api/downloads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      msg.textContent = err.detail || `요청 실패 (${res.status})`;
+    } else {
+      document.getElementById("url").value = "";
+    }
+  } catch {
+    msg.textContent = "서버에 연결할 수 없습니다.";
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+async function poll() {
+  try {
+    const jobs = await (await fetch("/api/downloads")).json();
+    document.getElementById("jobs").innerHTML = jobs.map(j => `
+      <tr>
+        <td>${esc(j.title || j.url)}</td>
+        <td class="st-${esc(j.status)}">${STATUS_KO[j.status] || esc(j.status)}</td>
+        <td><span style="display:flex;align-items:center">
+          <span class="bar"><div style="width:${Number(j.percent) || 0}%"></div></span>
+          <span class="pct">${(Number(j.percent) || 0).toFixed(1)}%</span>
+        </span></td>
+        <td>${esc(j.speed || "")}</td>
+        <td>${esc(j.detail || "")}</td>
+      </tr>`).join("");
+  } catch { /* 서버 미응답 시 다음 폴링에서 재시도 */ }
+}
+setInterval(poll, 1000);
+poll();
+</script>
+</body>
+</html>
