@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Test cache
+.pytest_cache/
+
+# 다운로드 산출물 (영상 파일은 저장소에 올리지 않음)
+downloads/
+*.mp4
+*.m4a
+*.part
+*.ytdl
+
+# Claude Code 로컬 설정
+.claude/settings.local.json
+
+# macOS
+.DS_Store
