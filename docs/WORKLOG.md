@@ -104,3 +104,14 @@
 - **검증 결과**: 로컬 pytest 19/19, gui.py --selftest 통과 (macOS). Windows 실검증은 CI windows-latest 러너에서 수행 (PR CI)
 - **현재 진행도**: windows-installer 브랜치에서 PR 진행
 - **다음 단계**: CI green 확인 후 main 병합
+
+### 9차 작업 (같은 날) — 퍼블릭 공개 준비: 라이선스·면책·README
+- **목표**: 저장소 퍼블릭 전환 대비 라이선스/저작권 명시 + 설치·사용법 상세 가시화 문서 (사용자 요구)
+- **결정사항**:
+  - 코드 라이선스는 MIT 채택 — "개인 용도 허용 + 상업적 이용·수정 배포 시 무책임" 요구를 AS IS/무책임 표준 조항으로 충족
+  - 콘텐츠 저작권·YouTube 약관·서드파티 라이선스 준수 책임은 사용자에게 있음을 README 면책 조항 4개 항으로 명문화
+  - ffmpeg(GPL)는 저장소 미포함·사용자 직접 취득 구조임을 서드파티 표에 명시 (동봉 재배포 시 GPL 의무는 재배포자 몫)
+- **산출물**: `LICENSE`(MIT), `README.md` 전면 작성(뱃지, mermaid 동작 원리·설치 흐름도, GUI ASCII 화면 구성, 3가지 사용법·CLI 예제 모음, 문제 해결·서드파티 라이선스 표), pyproject 메타데이터(license, description)
+- **검증 결과**: uv sync 정상, pytest 19/19 유지
+- **현재 진행도**: PR #1에 통합 (CI green 후 사용자 병합 대기 — 자체 병합은 정책상 차단)
+- **다음 단계**: 사용자가 PR #1 병합 → 저장소 퍼블릭 전환 (GitHub Settings ▸ General ▸ Visibility)
