@@ -59,3 +59,10 @@
 - **현재 진행도**: 구현 완료(main.py, downloader.py, tests), 로컬 커밋 완료
 - **남은 미해결**: GitHub 원격 저장소 연결 (저장소 URL 필요 또는 gh CLI 설치·인증 필요)
 - **다음 단계**: 원격 저장소 URL 확보 → `git remote add origin` → `git push -u origin main`
+
+### 5차 작업 (같은 날) — GitHub 연결 완료
+- **목표**: 다중 GitHub 계정 체계 구축 및 원격 푸시
+- **결정사항**: gh CLI 멀티 계정(`gh auth switch`)으로 KIMHeeKwon(개인)/ETRI-ULSOO(업무) 전환 관리, 전역 CLAUDE.md에 지침 명문화
+- **산출물**: https://github.com/KIMHeeKwon/Youtube_Downlaod 에 main 브랜치 푸시 완료 (커밋 3건)
+- **현재 진행도**: MVP 구현·검증·원격 연결 모두 완료
+- **다음 단계**: Phase 2 착수 여부 판단 (재생목록/웹 UI/자막), opus-in-MP4 호환성 방침 결정
