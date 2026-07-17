@@ -66,3 +66,9 @@
 - **산출물**: https://github.com/KIMHeeKwon/Youtube_Downlaod 에 main 브랜치 푸시 완료 (커밋 3건)
 - **현재 진행도**: MVP 구현·검증·원격 연결 모두 완료
 - **다음 단계**: Phase 2 착수 여부 판단 (재생목록/웹 UI/자막), opus-in-MP4 호환성 방침 결정
+
+### 6차 작업 (같은 날) — CI 구축
+- **목표**: GitHub Actions workflow 설정
+- **산출물**: `.github/workflows/ci.yml` — main push/PR 시 ubuntu-latest에서 uv sync → pytest 실행 (setup-uv 캐시 사용)
+- **검증 결과**: 첫 실행 성공 (run 29552693396, 10초)
+- **현재 진행도**: CI 가동 중. Phase 2 웹 UI(webapp.py, static/)는 로컬 미커밋 상태로 진행 중
