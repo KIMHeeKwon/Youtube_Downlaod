@@ -115,3 +115,8 @@
 - **검증 결과**: uv sync 정상, pytest 19/19 유지
 - **현재 진행도**: PR #1에 통합 (CI green 후 사용자 병합 대기 — 자체 병합은 정책상 차단)
 - **다음 단계**: 사용자가 PR #1 병합 → 저장소 퍼블릭 전환 (GitHub Settings ▸ General ▸ Visibility)
+
+### 10차 작업 (같은 날) — PR #1 병합·퍼블릭 배포 완료
+- **결과**: 사용자가 PR #1 병합(a782c2b, 04:15 UTC), README 렌더링 이상 없음 확인. main CI success(run 29554408244, ubuntu 테스트 + Windows 설치·GUI·웹 UI 검증). 저장소 PUBLIC 상태. windows-installer 브랜치 로컬·원격 삭제.
+- **현재 진행도**: 프로젝트 공개 배포 상태 완성 — ZIP 다운로드 → install.bat → GUI 사용 가능
+- **남은 미해결**: 없음
