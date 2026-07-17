@@ -24,3 +24,39 @@ jobs:
 
       - name: Run unit tests
         run: uv run pytest -v
+
+  # windows/install.ps1 원클릭 설치 스크립트를 실제 Windows에서 검증
+  windows-install:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run one-click installer
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File windows/install.ps1
+
+      - name: Verify environment (uv, ffmpeg, pytest)
+        shell: powershell
+        run: |
+          $env:Path = "$pwd\tools;$env:USERPROFILE\.local\bin;$env:USERPROFILE\.deno\bin;$env:Path"
+          uv run python -c "import shutil; assert shutil.which('ffmpeg'), 'ffmpeg not found'"
+          uv run pytest -q
+          if (-not (Test-Path ".venv\Scripts\pythonw.exe")) { Write-Error "pythonw.exe missing"; exit 1 }
+          uv run python gui.py --selftest
+
+      - name: Smoke test web UI
+        shell: powershell
+        run: |
+          $env:Path = "$pwd\tools;$env:USERPROFILE\.local\bin;$env:USERPROFILE\.deno\bin;$env:Path"
+          $p = Start-Process uv -ArgumentList "run","uvicorn","webapp:app","--port","8000" -PassThru -NoNewWindow
+          Start-Sleep 20
+          $r = Invoke-WebRequest http://127.0.0.1:8000/ -UseBasicParsing
+          if ($r.StatusCode -ne 200) { exit 1 }
+          try {
+            Invoke-WebRequest -Method POST http://127.0.0.1:8000/api/downloads `
+              -ContentType "application/json" -Body '{"url":"https://example.com/x"}' -UseBasicParsing
+            Write-Error "expected 400 for invalid URL"; exit 1
+          } catch {
+            Write-Host "invalid URL correctly rejected (400)"
+          }
+          Stop-Process $p.Id

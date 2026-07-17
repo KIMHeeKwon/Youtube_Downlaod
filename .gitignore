@@ -19,6 +19,9 @@ downloads/
 *.part
 *.ytdl
 
+# Windows 설치 스크립트가 받는 ffmpeg 바이너리 (GPL — 저장소에 동봉 금지, DESIGN §6.1)
+tools/
+
 # Claude Code 로컬 설정
 .claude/settings.local.json
 
