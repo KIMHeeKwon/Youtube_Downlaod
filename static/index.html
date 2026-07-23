@@ -5,27 +5,98 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>YouTube 고화질 다운로더</title>
 <style>
+  /* 테마 토큰 — 라이트 기본값 */
+  :root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --text: #222222;
+    --panel: #f5f5f5;
+    --border: #dddddd;
+    --bar-track: #eeeeee;
+    --bar-fill: #4caf50;
+    --accent: #cc0000;
+    --accent-text: #ffffff;
+    --disabled: #999999;
+    --error: #cc0000;
+    --done: #2e7d32;
+  }
+  /* 시스템 다크 테마 추종 (수동 선택이 없을 때) */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #1b1b1b;
+      --text: #e8e6e3;
+      --panel: #2a2a2a;
+      --border: #444444;
+      --bar-track: #3a3a3a;
+      --bar-fill: #66bb6a;
+      --accent: #d64545;
+      --accent-text: #ffffff;
+      --disabled: #666666;
+      --error: #ef7070;
+      --done: #81c784;
+    }
+  }
+  /* 수동 선택은 시스템 설정보다 우선 */
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --text: #222222;
+    --panel: #f5f5f5;
+    --border: #dddddd;
+    --bar-track: #eeeeee;
+    --bar-fill: #4caf50;
+    --accent: #cc0000;
+    --accent-text: #ffffff;
+    --disabled: #999999;
+    --error: #cc0000;
+    --done: #2e7d32;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1b1b1b;
+    --text: #e8e6e3;
+    --panel: #2a2a2a;
+    --border: #444444;
+    --bar-track: #3a3a3a;
+    --bar-fill: #66bb6a;
+    --accent: #d64545;
+    --accent-text: #ffffff;
+    --disabled: #666666;
+    --error: #ef7070;
+    --done: #81c784;
+  }
+
   body { font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-         max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+         max-width: 900px; margin: 2rem auto; padding: 0 1rem;
+         color: var(--text); background: var(--bg); }
+  header { display: flex; align-items: center; justify-content: space-between; }
   h1 { font-size: 1.4rem; }
+  #theme-btn { background: var(--panel); color: var(--text);
+               border: 1px solid var(--border); border-radius: 4px;
+               padding: .35rem .7rem; cursor: pointer; font-size: .85rem; }
   form { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
-         padding: 1rem; background: #f5f5f5; border-radius: 8px; }
+         padding: 1rem; background: var(--panel); border-radius: 8px; }
   input[type=url] { flex: 1 1 320px; padding: .5rem; }
   input[type=text] { width: 90px; padding: .5rem; }
   select, button { padding: .5rem; }
-  button { background: #c00; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
-  button:disabled { background: #999; }
+  form button { background: var(--accent); color: var(--accent-text);
+                border: 0; border-radius: 4px; cursor: pointer; }
+  form button:disabled { background: var(--disabled); }
   table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
-  th, td { border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; font-size: .9rem; }
-  .bar { background: #eee; border-radius: 4px; overflow: hidden; width: 140px; height: 16px; }
-  .bar > div { background: #4caf50; height: 100%; }
+  th, td { border-bottom: 1px solid var(--border); padding: .5rem; text-align: left; font-size: .9rem; }
+  .bar { background: var(--bar-track); border-radius: 4px; overflow: hidden; width: 140px; height: 16px; }
+  .bar > div { background: var(--bar-fill); height: 100%; }
   .pct { font-size: .75rem; margin-left: .3rem; }
-  .st-error { color: #c00; } .st-done { color: #2e7d32; }
-  #msg { color: #c00; margin-top: .5rem; min-height: 1.2em; }
+  .st-error { color: var(--error); } .st-done { color: var(--done); }
+  #msg { color: var(--error); margin-top: .5rem; min-height: 1.2em; }
 </style>
 </head>
 <body>
-<h1>YouTube 고화질 다운로더</h1>
+<header>
+  <h1>YouTube 고화질 다운로더</h1>
+  <button type="button" id="theme-btn" title="테마 전환"></button>
+</header>
 <form id="form">
   <input type="url" id="url" placeholder="YouTube 영상 또는 재생목록 URL" required>
   <select id="max_height" title="최대 해상도">
@@ -51,6 +122,26 @@
 <script>
 const STATUS_KO = { queued: "대기", downloading: "다운로드 중", merging: "병합 중",
                     done: "완료", error: "오류" };
+
+/* 테마 전환 — 수동 선택은 localStorage에 저장, 없으면 시스템 설정 추종 */
+const themeBtn = document.getElementById("theme-btn");
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+
+function currentTheme() {
+  return document.documentElement.dataset.theme ||
+    (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+}
+function updateThemeBtn() {
+  themeBtn.textContent = currentTheme() === "dark" ? "☀️ 라이트" : "🌙 다크";
+}
+themeBtn.addEventListener("click", () => {
+  const next = currentTheme() === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem("theme", next);
+  updateThemeBtn();
+});
+updateThemeBtn();
 
 document.getElementById("form").addEventListener("submit", async (e) => {
   e.preventDefault();
