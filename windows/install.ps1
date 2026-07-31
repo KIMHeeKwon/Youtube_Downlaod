@@ -28,7 +28,30 @@ if (-not (Test-Path (Join-Path $tools "ffmpeg.exe"))) {
     Write-Host "==> Downloading ffmpeg (about 80 MB)..."
     New-Item -ItemType Directory -Force -Path $tools | Out-Null
     $zip = Join-Path $env:TEMP "ffmpeg-release-essentials.zip"
-    Invoke-WebRequest "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile $zip
+    # gyan.dev가 일시 장애(503 등)일 수 있어 URL별 3회 재시도 후 미러로 폴백
+    $ffmpegUrls = @(
+        "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip",
+        "https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip"
+    )
+    $downloaded = $false
+    foreach ($url in $ffmpegUrls) {
+        for ($try = 1; $try -le 3; $try++) {
+            try {
+                Invoke-WebRequest $url -OutFile $zip
+                $downloaded = $true
+                break
+            } catch {
+                Write-Host "  attempt $try/3 failed ($url): $($_.Exception.Message)"
+                if ($try -lt 3) { Start-Sleep -Seconds (10 * $try) }
+            }
+        }
+        if ($downloaded) { break }
+        Write-Host "==> Switching to fallback mirror..."
+    }
+    if (-not $downloaded) {
+        Write-Error "ffmpeg download failed from all mirrors"
+        exit 1
+    }
     $extract = Join-Path $env:TEMP "ffmpeg_extract"
     Expand-Archive $zip -DestinationPath $extract -Force
     Get-ChildItem -Path $extract -Recurse -Include ffmpeg.exe, ffprobe.exe |
