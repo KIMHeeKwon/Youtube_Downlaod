@@ -94,6 +94,12 @@
 - **결정사항**: checkout v4→v7, setup-uv v5→v9.0.0 (v9 별칭 태그가 없어 정확 버전으로 고정 — 1차 시도 실패에서 확인)
 - **검증 결과**: CI 전체 통과 + 어노테이션 0건 (run 30674758086)
 
+### CI 워크플로 잡별 분리 + README 배지 교체
+- **목표**: README에 잡별(test / windows-install) 상태 배지 노출
+- **결정사항**: GitHub 배지는 워크플로 단위로만 제공되므로 ci.yml을 test.yml / windows-install.yml 두 파일로 분리 (잡 내용은 동일, 트리거 동일)
+- **산출물**: `.github/workflows/test.yml`, `.github/workflows/windows-install.yml` (ci.yml 삭제), README 배지 2종 교체 (branch=main 한정)
+- **검증 결과**: 분리된 두 워크플로 모두 첫 실행 성공 (커밋 a357767)
+
 ### 7차 작업 (같은 날) — Phase 2 구현·검증 완료 (재생목록·자막·웹 UI)
 - **목표**: DESIGN §7 Phase 2 후보 3건 전체 구현 및 실전 검증 (사용자 확정: 3건 모두, 코덱 기본값은 현행 유지)
 - **결정사항**:
