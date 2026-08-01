@@ -1,0 +1,26 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
+        with:
+          enable-cache: true
+
+      # .python-version(3.12)에 맞는 Python을 uv가 자동 설치
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run unit tests
+        run: uv run pytest -v

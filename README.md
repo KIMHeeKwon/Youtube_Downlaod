@@ -1,6 +1,7 @@
 # YouTube 고화질 다운로더
 
-[![CI](https://github.com/KIMHeeKwon/Youtube_Downlaod/actions/workflows/ci.yml/badge.svg)](https://github.com/KIMHeeKwon/Youtube_Downlaod/actions)
+[![test](https://github.com/KIMHeeKwon/Youtube_Downlaod/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/KIMHeeKwon/Youtube_Downlaod/actions/workflows/test.yml)
+[![windows-install](https://github.com/KIMHeeKwon/Youtube_Downlaod/actions/workflows/windows-install.yml/badge.svg?branch=main)](https://github.com/KIMHeeKwon/Youtube_Downlaod/actions/workflows/windows-install.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](pyproject.toml)
 
